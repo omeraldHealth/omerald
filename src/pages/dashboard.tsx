@@ -4,7 +4,6 @@ import { dashTabs } from '@/components/common/recoil/dashboard';
 import { useRecoilState } from 'recoil';
 import dynamic from 'next/dynamic';
 import React, { useMemo, useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
 import { Spinner } from '@/components/atoms/loader';
 import { useAuthContext } from '@/components/common/utils/context/auth.context';
 import ErrorBoundary from '@/components/common/utils/ErrorBoundary';
@@ -116,18 +115,10 @@ const Doctor = dynamic(
 );
 
 export default function Dashboard() {
-  const router = useRouter();
   const [dashboard, setDashboard] = useRecoilState(dashTabs);
   const { phoneNumber, profile } = useAuthContext();
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string>('user');
   const [isDoctorMode, setIsDoctorMode] = useState(false);
-
-  // Redirect role "user" to no-access page instead of dashboard
-  useEffect(() => {
-    if (userRole === 'user') {
-      router.replace('/no-access');
-    }
-  }, [userRole, router]);
 
   // Add dashboard-page class to body for overflow handling
   useEffect(() => {
@@ -140,7 +131,6 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchUserRole = async () => {
       if (!phoneNumber) {
-        setUserRole('user');
         return;
       }
 
@@ -151,11 +141,10 @@ export default function Dashboard() {
         const currentUser = users.find((u: any) => u && u.phoneNumber === phoneNumber);
         if (currentUser && currentUser.role) {
           setUserRole(currentUser.role);
-        } else {
-          setUserRole('user');
         }
       } catch (error: any) {
         console.error('Error fetching user role:', error);
+        // Continue with default 'user' role on error
         setUserRole('user');
       }
     };
@@ -204,8 +193,6 @@ export default function Dashboard() {
   }, [phoneNumber, dashboard, setDashboard]);
 
   const tabContent = useMemo(() => {
-    if (userRole === null || userRole === 'user') return null;
-
     // In doctor mode, only allow Analytics, Members, Reports, Profile, MemberDetails, Doctor
     if (isDoctorMode && !['Analytics', 'Members', 'Reports', 'Profile', 'MemberDetails', 'Doctor'].includes(dashboard)) {
       return <Analytics />;
@@ -243,20 +230,6 @@ export default function Dashboard() {
         return userRole === 'admin' ? <AdminHome /> : <Home />;
     }
   }, [dashboard, userRole, isDoctorMode]);
-
-  // Loading or redirecting: show spinner until role is known or redirect completes
-  if (userRole === null || userRole === 'user') {
-    return (
-      <UserLayout
-        tabName="Omerald | Dashboard"
-        tabDescription="Omerald is a health management platform to connect people and doctors with ease."
-      >
-        <div className="min-h-[400px] flex items-center justify-center">
-          <Spinner message={userRole === 'user' ? 'Redirecting...' : 'Checking access...'} />
-        </div>
-      </UserLayout>
-    );
-  }
 
   return (
     <UserLayout
