@@ -62,8 +62,9 @@ export function getSubscriptionPlan(tier: SubscriptionTier | string): Subscripti
 }
 
 /** Use for entitlements (limits, badge, analytics). Prefers effectiveSubscription when user is a member of an Enterprise/Premium primary. */
-export function getEffectiveSubscription(profile: { subscription?: string; effectiveSubscription?: string } | null | undefined): SubscriptionTier | string {
-  return (profile as any)?.effectiveSubscription ?? profile?.subscription ?? 'Free';
+export function getEffectiveSubscription(profile: Record<string, unknown> | null | undefined): SubscriptionTier | string {
+  const p = profile as { subscription?: string; effectiveSubscription?: string } | null | undefined;
+  return p?.effectiveSubscription ?? p?.subscription ?? 'Free';
 }
 
 /** Source of effective subscription when inherited from a primary (Enterprise/Premium owner). */
@@ -75,13 +76,13 @@ export interface EffectiveSubscriptionSource {
   primaryName: string;
 }
 
-export function getEffectiveSubscriptionSource(profile: { effectiveSubscriptionSource?: EffectiveSubscriptionSource } | null | undefined): EffectiveSubscriptionSource | null {
-  return (profile as any)?.effectiveSubscriptionSource ?? null;
+export function getEffectiveSubscriptionSource(profile: Record<string, unknown> | null | undefined): EffectiveSubscriptionSource | null {
+  return (profile as { effectiveSubscriptionSource?: EffectiveSubscriptionSource } | null | undefined)?.effectiveSubscriptionSource ?? null;
 }
 
 /** Members limit for the user: uses effectiveMembersLimit when set (sublimit for inherited plan), else full limit for their effective tier. */
-export function getEffectiveMembersLimit(profile: { effectiveMembersLimit?: number; subscription?: string; effectiveSubscription?: string } | null | undefined): number {
-  const p = profile as any;
+export function getEffectiveMembersLimit(profile: Record<string, unknown> | null | undefined): number {
+  const p = profile as { effectiveMembersLimit?: number } | null | undefined;
   if (p?.effectiveMembersLimit != null && typeof p.effectiveMembersLimit === 'number') {
     return p.effectiveMembersLimit;
   }
@@ -89,8 +90,8 @@ export function getEffectiveMembersLimit(profile: { effectiveMembersLimit?: numb
 }
 
 /** Reports limit for the user: uses effectiveReportsLimit when set (sublimit for inherited plan), else full limit for their effective tier. */
-export function getEffectiveReportsLimit(profile: { effectiveReportsLimit?: number; subscription?: string; effectiveSubscription?: string } | null | undefined): number {
-  const p = profile as any;
+export function getEffectiveReportsLimit(profile: Record<string, unknown> | null | undefined): number {
+  const p = profile as { effectiveReportsLimit?: number } | null | undefined;
   if (p?.effectiveReportsLimit != null && typeof p.effectiveReportsLimit === 'number') {
     return p.effectiveReportsLimit;
   }
