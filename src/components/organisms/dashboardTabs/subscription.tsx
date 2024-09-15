@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import { useRecoilValue } from 'recoil';
 import { profileState } from '@/components/common/recoil/profile';
 import { useAuthContext } from '@/components/common/utils/context/auth.context';
-import { SUBSCRIPTION_PLANS, SubscriptionTier, getSubscriptionPlan } from '@/lib/utils/subscription';
+import { SUBSCRIPTION_PLANS, SubscriptionTier, getSubscriptionPlan, getEffectiveSubscription, getEffectiveSubscriptionSource, getEffectiveMembersLimit, getEffectiveReportsLimit } from '@/lib/utils/subscription';
 import { useGetProfileByPhone } from '@/hooks/reactQuery/profile';
 
 export default function Subscription() {
@@ -20,7 +20,7 @@ export default function Subscription() {
   const phoneNumberForQuery = profileData?.phoneNumber || authPhoneNumber;
   const profileQuery = useGetProfileByPhone(phoneNumberForQuery);
   const currentProfile = profileQuery.data || profileData;
-  const currentSubscription = (currentProfile?.subscription || 'Free') as SubscriptionTier;
+  const currentSubscription = getEffectiveSubscription(currentProfile) as SubscriptionTier;
   const currentPlan = getSubscriptionPlan(currentSubscription);
 
   // Get user phone number from multiple sources (fallback chain)
@@ -534,11 +534,25 @@ export default function Subscription() {
         </div>
         
         {currentPlan && (
-          <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200 max-w-md mx-auto">
+          <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200 max-w-md mx-auto space-y-2">
             <p className="text-sm text-gray-700 text-center">
               <span className="font-semibold">Current Plan:</span> {currentPlan.name}
-              {currentPlan.price > 0 && <span className="ml-2">(₹{currentPlan.price}/month)</span>}
+              {currentPlan.price > 0 && !getEffectiveSubscriptionSource(currentProfile) && <span className="ml-2">(₹{currentPlan.price}/month)</span>}
             </p>
+            {getEffectiveSubscriptionSource(currentProfile) && (
+              <div className="pt-2 border-t border-blue-200 text-left">
+                <p className="text-xs font-medium text-gray-700">Member of {currentPlan.name} account</p>
+                <p className="text-sm text-gray-600">
+                  Plan owner: <span className="font-semibold">{getEffectiveSubscriptionSource(currentProfile)?.primaryName}</span>
+                  {getEffectiveSubscriptionSource(currentProfile)?.primaryPhoneNumber && (
+                    <span className="text-gray-500 ml-1">({getEffectiveSubscriptionSource(currentProfile)?.primaryPhoneNumber})</span>
+                  )}
+                </p>
+                <p className="text-xs text-gray-600 mt-1">
+                  Your limits: {getEffectiveMembersLimit(currentProfile)} members, {getEffectiveReportsLimit(currentProfile)} reports (10% of plan)
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>

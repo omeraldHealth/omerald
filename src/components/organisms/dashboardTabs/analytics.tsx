@@ -5,7 +5,7 @@ import { useAuthContext } from '@/components/common/utils/context/auth.context';
 import { useGetProfileByPhone, useGetMembersByIds } from '@/hooks/reactQuery/profile';
 import { useGetManyReports } from '@/hooks/reactQuery/reports';
 import ErrorBoundary from '@/components/common/utils/ErrorBoundary';
-import { hasAnalyticsAccess, getSubscriptionPlan } from '@/lib/utils/subscription';
+import { hasAnalyticsAccess, getSubscriptionPlan, getEffectiveSubscription } from '@/lib/utils/subscription';
 import { useSetRecoilState } from 'recoil';
 import { dashTabs } from '@/components/common/recoil/dashboard';
 import {
@@ -65,8 +65,8 @@ function AnalyticsContent() {
   const currentUserProfileQuery = useGetProfileByPhone(authProfile?.phoneNumber);
   const currentUserProfile = currentUserProfileQuery.data || authProfile;
   
-  // Check if user has analytics access
-  const subscription = currentUserProfile?.subscription || 'Free';
+  // Check if user has analytics access (effective = own or inherited from Enterprise/Premium primary)
+  const subscription = getEffectiveSubscription(currentUserProfile);
   const hasAccess = hasAnalyticsAccess(subscription);
   
   // Show upgrade message for free users

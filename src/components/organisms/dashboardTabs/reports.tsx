@@ -4,7 +4,7 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useGetManyReports, useGetSharedReports, useGetReportsFromDC, useGetPendingSharedReports, useAcceptSharedReport } from '@/hooks/reactQuery/reports';
 import { useAuthContext } from '@/components/common/utils/context/auth.context';
 import debounce from 'lodash.debounce';
-import { getReportsLimit, getSubscriptionPlan } from '@/lib/utils/subscription';
+import { getSubscriptionPlan, getEffectiveSubscription, getEffectiveReportsLimit, getEffectiveSubscriptionSource } from '@/lib/utils/subscription';
 import { PencilIcon, EyeIcon, ShareIcon, TrashIcon, CheckCircleIcon, XCircleIcon, ClockIcon, DocumentIcon } from '@heroicons/react/24/solid';
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
@@ -94,7 +94,9 @@ export default function Reports() {
   const [reportTypeNames, setReportTypeNames] = useState<Map<string, string>>(new Map());
   const [sourceFilter, setSourceFilter] = useState<'all' | 'my-upload' | 'dc-shared' | 'user-shared'>('all');
 
-  // Filter reports by selected member or current user only
+  // For display: list shows only current user's (or selected member's) reports.
+  // For limit: owner uses a separate fetch of account-wide reports (see reportsForLimit below).
+  const isAccountOwner = !getEffectiveSubscriptionSource(profile);
   const users: string[] = [];
   if (selectedMemberId && profile) {
     // If viewing as a member, only show that member's reports
@@ -106,15 +108,27 @@ export default function Reports() {
       users.push(profile.phoneNumber);
     }
   } else {
-    // Default: show current user's reports only (not all members)
+    // Default: show current user's reports only
     if (profile?.phoneNumber) {
       users.push(profile.phoneNumber);
     }
   }
 
-  // Fetch local reports
+  // Fetch local reports (for display; may be single member when owner has one selected)
   const reportsQuery = useGetManyReports(users.length > 0 ? users : undefined);
   const localReports = reportsQuery.data || [];
+
+  // When owner: fetch all account reports (self + members) for limit count so it decreases when any member adds
+  const ownerAccountUsers = useMemo(() => {
+    if (!isAccountOwner || !profile?.phoneNumber) return undefined;
+    const phones = [profile.phoneNumber];
+    profile.members?.forEach((m: any) => {
+      if (m?.phoneNumber && m.phoneNumber !== profile.phoneNumber) phones.push(m.phoneNumber);
+    });
+    return phones.length ? phones : undefined;
+  }, [isAccountOwner, profile?.phoneNumber, profile?.members]);
+  const reportsForLimitQuery = useGetManyReports(ownerAccountUsers);
+  const reportsForLimit = isAccountOwner ? (reportsForLimitQuery.data || []) : null;
 
   // Fetch pending shared reports from omerald users
   const { data: omeraldPendingSharedReports, isLoading: isLoadingOmeraldShared } = useGetPendingSharedReports(
@@ -1227,12 +1241,12 @@ export default function Reports() {
     }
   };
 
-  // Calculate reports remaining
-  // Only count local reports (user-uploaded) towards the limit, not DC shared reports
-  const subscription = profile?.subscription || 'Free';
-  const reportsLimit = getReportsLimit(subscription);
-  // Count only accepted local reports (user-uploaded), exclude DC shared reports
-  const acceptedLocalReports = localReports.filter((r: any) => r.status === 'accepted' || !r.status);
+  // Calculate reports remaining (effective = own or inherited; inheritors get sublimits)
+  // Owner: count all account reports (self + members) toward limit. Member: count only own.
+  const subscription = getEffectiveSubscription(profile);
+  const reportsLimit = getEffectiveReportsLimit(profile);
+  const reportsToCount = reportsForLimit ?? localReports;
+  const acceptedLocalReports = reportsToCount.filter((r: any) => r.status === 'accepted' || !r.status);
   const currentReportsCount = acceptedLocalReports.length;
   const reportsRemaining = Math.max(0, reportsLimit - currentReportsCount);
   const subscriptionPlan = getSubscriptionPlan(subscription);
@@ -1240,7 +1254,8 @@ export default function Reports() {
   console.log('Reports count calculation:', {
     subscription,
     reportsLimit,
-    localReportsCount: localReports.length,
+    isAccountOwner,
+    reportsToCountLength: reportsToCount.length,
     acceptedLocalReportsCount: acceptedLocalReports.length,
     currentReportsCount,
     reportsRemaining,

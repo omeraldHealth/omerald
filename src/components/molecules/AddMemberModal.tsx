@@ -7,7 +7,7 @@ import { useAuthContext } from '@/components/common/utils/context/auth.context';
 import { getProfileByPhone, createProfile, addMember } from '@/components/common/lib/constants/urls';
 import { useUpdateProfile } from '@/hooks/reactQuery/profile';
 import toast from 'react-hot-toast';
-import { canAddMember, getMembersLimit, getSubscriptionPlan } from '@/lib/utils/subscription';
+import { canAddMember, getSubscriptionPlan, getEffectiveSubscription, getEffectiveMembersLimit } from '@/lib/utils/subscription';
 import { useSetRecoilState } from 'recoil';
 import { dashTabs } from '@/components/common/recoil/dashboard';
 
@@ -287,15 +287,14 @@ export default function AddMemberModal({ visible, setVisible, profile, onMemberA
       return;
     }
 
-    // Check member limit
+    // Check member limit (effective = own or inherited; inheritors get sublimits)
     const currentMembersCount = profile?.members?.length || 0;
-    const subscription = profile?.subscription || 'Free';
-    
-    if (!canAddMember(currentMembersCount, subscription)) {
-      const limit = getMembersLimit(subscription);
+    const subscription = getEffectiveSubscription(profile);
+    const membersLimit = getEffectiveMembersLimit(profile);
+    if (!canAddMember(currentMembersCount, membersLimit)) {
       const plan = getSubscriptionPlan(subscription);
       toast.error(
-        `You've reached the member limit (${limit}) for your ${plan.name} plan. Upgrade to add more members.`,
+        `You've reached the member limit (${membersLimit}) for your ${plan.name} plan. Upgrade to add more members.`,
         { duration: 5000 }
       );
       // Optionally redirect to subscription page
@@ -554,15 +553,14 @@ export default function AddMemberModal({ visible, setVisible, profile, onMemberA
       return;
     }
 
-    // Check member limit
+    // Check member limit (effective = own or inherited; inheritors get sublimits)
     const currentMembersCount = profile?.members?.length || 0;
-    const subscription = profile?.subscription || 'Free';
-    
-    if (!canAddMember(currentMembersCount, subscription)) {
-      const limit = getMembersLimit(subscription);
+    const subscription = getEffectiveSubscription(profile);
+    const membersLimit = getEffectiveMembersLimit(profile);
+    if (!canAddMember(currentMembersCount, membersLimit)) {
       const plan = getSubscriptionPlan(subscription);
       toast.error(
-        `You've reached the member limit (${limit}) for your ${plan.name} plan. Upgrade to add more members.`,
+        `You've reached the member limit (${membersLimit}) for your ${plan.name} plan. Upgrade to add more members.`,
         { duration: 5000 }
       );
       // Optionally redirect to subscription page

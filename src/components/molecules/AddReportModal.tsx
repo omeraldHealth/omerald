@@ -9,7 +9,7 @@ import { useAuthContext } from '@/components/common/utils/context/auth.context';
 import { useQueryClient } from '@tanstack/react-query';
 import CameraCapture from './CameraCapture';
 import { convertImagesToPdf, mergeFilesToPdf, isCameraSupported } from '@/lib/utils/imageToPdf';
-import { canAddReport, getReportsLimit, getSubscriptionPlan } from '@/lib/utils/subscription';
+import { canAddReport, getSubscriptionPlan, getEffectiveSubscription, getEffectiveReportsLimit } from '@/lib/utils/subscription';
 import { useGetManyReports } from '@/hooks/reactQuery/reports';
 import { useGetReportTypesFromAdmin, useGetLegacyHealthTopics } from '@/hooks/reactQuery';
 import { useSetRecoilState } from 'recoil';
@@ -324,15 +324,14 @@ export default function AddReportModal({
       return;
     }
 
-    // Check report limit
+    // Check report limit (effective = own or inherited; inheritors get sublimits)
     const currentReportsCount = Array.isArray(allReports) ? allReports.length : 0;
-    const subscription = profile?.subscription || 'Free';
-    
-    if (!canAddReport(currentReportsCount, subscription)) {
-      const limit = getReportsLimit(subscription);
+    const subscription = getEffectiveSubscription(profile);
+    const reportsLimit = getEffectiveReportsLimit(profile);
+    if (!canAddReport(currentReportsCount, reportsLimit)) {
       const plan = getSubscriptionPlan(subscription);
       toast.error(
-        `You've reached the report limit (${limit}) for your ${plan.name} plan. Upgrade to upload more reports.`,
+        `You've reached the report limit (${reportsLimit}) for your ${plan.name} plan. Upgrade to upload more reports.`,
         { duration: 5000 }
       );
       // Optionally redirect to subscription page

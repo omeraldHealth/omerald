@@ -9,7 +9,7 @@ import { useAuthContext } from '@/components/common/utils/context/auth.context';
 import { usePendingReportsCount, useGetManyReports, useGetPendingSharedReports } from '@/hooks/reactQuery/reports';
 import { useRecoilValue } from 'recoil';
 import { dashTabs } from '@/components/common/recoil/dashboard';
-import { getSubscriptionPlan } from '@/lib/utils/subscription';
+import { getSubscriptionPlan, getEffectiveSubscription, getEffectiveSubscriptionSource } from '@/lib/utils/subscription';
 import { useSetRecoilState } from 'recoil';
 
 interface DashboardHeaderProps {
@@ -25,10 +25,11 @@ export function DashboardHeader({ onMenuClick, onToggleSidebar, isSidebarCollaps
   const currentTab = useRecoilValue(dashTabs);
   const setDash = useSetRecoilState(dashTabs);
   
-  // Get subscription info
-  const subscription = profile?.subscription || 'Free';
+  // Get subscription info (effective = own or inherited from Enterprise/Premium primary)
+  const subscription = getEffectiveSubscription(profile);
   const plan = getSubscriptionPlan(subscription);
   const isPremium = subscription === 'Premium' || subscription === 'Enterprise';
+  const subscriptionSource = getEffectiveSubscriptionSource(profile);
 
   // Get pending reports count from DC app
   const { data: dcPendingCount = 0 } = usePendingReportsCount(phoneNumber || undefined);
@@ -201,7 +202,7 @@ export function DashboardHeader({ onMenuClick, onToggleSidebar, isSidebarCollaps
                     : 'User'}
                 </p>
                 <div className="flex items-center gap-2">
-                  <p className="text-xs text-gray-500">Primary User</p>
+                  <p className="text-xs text-gray-500">{subscriptionSource ? 'Member' : 'Primary User'}</p>
                   {/* Subscription Badge */}
                   <button
                     onClick={() => setDash('Subscription')}
@@ -212,7 +213,9 @@ export function DashboardHeader({ onMenuClick, onToggleSidebar, isSidebarCollaps
                         ? 'bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 text-yellow-900 border border-yellow-700 shadow-md'
                         : 'bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border border-blue-300'
                     }`}
-                    title={`${plan.name} Plan - Click to manage subscription`}
+                    title={subscriptionSource
+                      ? `${plan.name} via ${subscriptionSource.primaryName} - Click to view details`
+                      : `${plan.name} Plan - Click to manage subscription`}
                   >
                     {isPremium && (
                       <svg className="w-3 h-3 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -227,6 +230,11 @@ export function DashboardHeader({ onMenuClick, onToggleSidebar, isSidebarCollaps
                     {plan.name}
                   </button>
                 </div>
+                {subscriptionSource && (
+                  <p className="text-[10px] text-gray-500 truncate max-w-[140px] mt-0.5" title={`Enterprise owner: ${subscriptionSource.primaryName}`}>
+                    via {subscriptionSource.primaryName}
+                  </p>
+                )}
               </div>
             </div>
             <UserButton afterSignOutUrl="/" />

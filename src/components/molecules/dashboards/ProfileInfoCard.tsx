@@ -16,6 +16,7 @@ import ActivitiesModal from './ActivitiesModal';
 import { DiagnosedConditionsAndReportTypes } from '@/components/molecules/DiagnosedConditionsAndReportTypes';
 import { XMarkIcon, TrashIcon } from '@heroicons/react/24/solid';
 import { useGetMembersByIds } from '@/hooks/reactQuery/profile';
+import { getEffectiveSubscription } from '@/lib/utils/subscription';
 
 interface ProfileInfoCardProps {
   profileData?: any;
@@ -279,7 +280,7 @@ export default function ProfileInfoCard({
             height={100}
             className="w-24 h-24 rounded-full border-4 border-gray-100 shadow-md mx-auto"
           />
-          {profile?.subscription && profile.subscription !== 'Free' && (
+          {getEffectiveSubscription(profile) !== 'Free' && (
             <div className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
               ⭐PAID
             </div>

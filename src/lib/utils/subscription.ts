@@ -61,6 +61,42 @@ export function getSubscriptionPlan(tier: SubscriptionTier | string): Subscripti
   return SUBSCRIPTION_PLANS.find(plan => plan.tier === tier) || SUBSCRIPTION_PLANS[0];
 }
 
+/** Use for entitlements (limits, badge, analytics). Prefers effectiveSubscription when user is a member of an Enterprise/Premium primary. */
+export function getEffectiveSubscription(profile: { subscription?: string; effectiveSubscription?: string } | null | undefined): SubscriptionTier | string {
+  return (profile as any)?.effectiveSubscription ?? profile?.subscription ?? 'Free';
+}
+
+/** Source of effective subscription when inherited from a primary (Enterprise/Premium owner). */
+export interface EffectiveSubscriptionSource {
+  primaryProfileId: string;
+  primaryFirstName: string;
+  primaryLastName: string;
+  primaryPhoneNumber: string;
+  primaryName: string;
+}
+
+export function getEffectiveSubscriptionSource(profile: { effectiveSubscriptionSource?: EffectiveSubscriptionSource } | null | undefined): EffectiveSubscriptionSource | null {
+  return (profile as any)?.effectiveSubscriptionSource ?? null;
+}
+
+/** Members limit for the user: uses effectiveMembersLimit when set (sublimit for inherited plan), else full limit for their effective tier. */
+export function getEffectiveMembersLimit(profile: { effectiveMembersLimit?: number; subscription?: string; effectiveSubscription?: string } | null | undefined): number {
+  const p = profile as any;
+  if (p?.effectiveMembersLimit != null && typeof p.effectiveMembersLimit === 'number') {
+    return p.effectiveMembersLimit;
+  }
+  return getMembersLimit(getEffectiveSubscription(profile));
+}
+
+/** Reports limit for the user: uses effectiveReportsLimit when set (sublimit for inherited plan), else full limit for their effective tier. */
+export function getEffectiveReportsLimit(profile: { effectiveReportsLimit?: number; subscription?: string; effectiveSubscription?: string } | null | undefined): number {
+  const p = profile as any;
+  if (p?.effectiveReportsLimit != null && typeof p.effectiveReportsLimit === 'number') {
+    return p.effectiveReportsLimit;
+  }
+  return getReportsLimit(getEffectiveSubscription(profile));
+}
+
 export function getMembersLimit(subscription: SubscriptionTier | string): number {
   return getSubscriptionPlan(subscription).membersLimit;
 }
@@ -75,17 +111,17 @@ export function hasAnalyticsAccess(subscription: SubscriptionTier | string): boo
 
 export function canAddMember(
   currentMembersCount: number,
-  subscription: SubscriptionTier | string
+  subscriptionOrLimit: SubscriptionTier | string | number
 ): boolean {
-  const limit = getMembersLimit(subscription);
+  const limit = typeof subscriptionOrLimit === 'number' ? subscriptionOrLimit : getMembersLimit(subscriptionOrLimit);
   return currentMembersCount < limit;
 }
 
 export function canAddReport(
   currentReportsCount: number,
-  subscription: SubscriptionTier | string
+  subscriptionOrLimit: SubscriptionTier | string | number
 ): boolean {
-  const limit = getReportsLimit(subscription);
+  const limit = typeof subscriptionOrLimit === 'number' ? subscriptionOrLimit : getReportsLimit(subscriptionOrLimit);
   return currentReportsCount < limit;
 }
 

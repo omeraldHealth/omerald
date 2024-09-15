@@ -6,7 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useAuthContext } from '@/components/common/utils/context/auth.context';
 import { useGetProfileByPhone, useGetPendingSharedMembers, useAcceptSharedMember, useRejectSharedMember } from '@/hooks/reactQuery/profile';
 import { useGetMembersByIds } from '@/hooks/reactQuery/profile';
-import { getMembersLimit, getSubscriptionPlan } from '@/lib/utils/subscription';
+import { getSubscriptionPlan, getEffectiveSubscription, getEffectiveMembersLimit } from '@/lib/utils/subscription';
 import MemberTable from '@/components/molecules/MemberTable';
 import MemberCard from '@/components/molecules/MemberCard';
 import AddMemberModal from '@/components/molecules/AddMemberModal';
@@ -675,8 +675,8 @@ function UserMembers() {
 
       {/* Members Remaining Indicator */}
       {(() => {
-        const subscription = profileData?.subscription || 'Free';
-        const membersLimit = getMembersLimit(subscription);
+        const subscription = getEffectiveSubscription(profileData);
+        const membersLimit = getEffectiveMembersLimit(profileData);
         // Count only actual members (exclude null/undefined entries)
         const validMembers = (profileData?.members || []).filter((m: any) => m && (m.memberId || m.phoneNumber));
         const currentMembersCount = validMembers.length;
