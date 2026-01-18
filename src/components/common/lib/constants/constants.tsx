@@ -43,6 +43,10 @@ export const AVATAR =
 export const LOGO_WHITE =
   "https://res.cloudinary.com/drjut62wv/image/upload/v1652576040/omerald/logo/logo-white_fhvjob.webp";
 
+// Default logo for diagnostic centers - used as fallback when logo is broken or missing
+export const DEFAULT_DC_LOGO_URL =
+  "https://res.cloudinary.com/drjut62wv/image/upload/v1677945620/omerald/diagnosticCenter/onlyOmeraldLogo_kwbcj8.png";
+
 export const DASHBOARD_STATS_CARDS = [
   {
     bgColor: "#4E36E2",

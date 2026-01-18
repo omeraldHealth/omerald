@@ -1,6 +1,17 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { DEFAULT_DC_LOGO_URL } from '@/components/common/lib/constants/constants';
 
 const DC_API_BASE_URL = 'https://omerald-dc.vercel.app';
+
+// Helper function to check if logo URL is broken or invalid
+const isValidLogoUrl = (url: string | null | undefined): boolean => {
+  if (!url) return false;
+  // Filter out broken Unsplash URLs and other invalid URLs
+  if (url.includes('images.unsplash.com') && url.includes('photo-1559757148')) {
+    return false;
+  }
+  return true;
+};
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== 'POST') {
@@ -43,15 +54,25 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     
     if (result.success && result.data) {
       const dcData = result.data;
+      
+      // Get logo URL and validate it - use default if broken or missing
+      const originalLogoUrl = dcData.brandingInfo?.logoUrl || null;
+      const logoUrl = isValidLogoUrl(originalLogoUrl) ? originalLogoUrl : DEFAULT_DC_LOGO_URL;
+      
       return res.status(200).json({
         success: true,
         data: {
           dcId,
           centerName: dcData.centerName || dcData.name,
-          logoUrl: dcData.brandingInfo?.logoUrl || null,
+          logoUrl: logoUrl,
           phoneNumber: dcData.phoneNumber || null,
           email: dcData.email || null,
-          brandingInfo: dcData.brandingInfo || null,
+          brandingInfo: dcData.brandingInfo ? {
+            ...dcData.brandingInfo,
+            logoUrl: logoUrl, // Override with validated logo URL
+          } : {
+            logoUrl: logoUrl,
+          },
         },
       });
     }

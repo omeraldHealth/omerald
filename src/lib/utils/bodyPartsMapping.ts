@@ -15,127 +15,127 @@ export const BODY_PARTS: BodyPart[] = [
     id: 'head-top',
     name: 'Head (Top)',
     keywords: ['head', 'skull', 'scalp', 'brain', 'cerebral', 'neurological'],
-    coordinates: { x: 45, y: 2, width: 10, height: 8 }, // Top of head
+    coordinates: { x: 45, y: 0, width: 10, height: 10 }, // Top of head
   },
   {
     id: 'forehead',
     name: 'Forehead',
     keywords: ['forehead', 'frontal', 'sinus', 'frontal sinus'],
-    coordinates: { x: 46, y: 10, width: 8, height: 4 },
+    coordinates: { x: 45, y: 10, width: 10, height: 5 },
   },
   {
     id: 'eyes',
     name: 'Eyes',
     keywords: ['eye', 'eyes', 'vision', 'retina', 'cornea', 'ocular', 'visual'],
-    coordinates: { x: 46, y: 14, width: 8, height: 3 },
+    coordinates: { x: 45, y: 15, width: 10, height: 5 },
   },
   {
     id: 'nose',
     name: 'Nose',
     keywords: ['nose', 'nasal', 'sinus', 'sinuses', 'rhinitis'],
-    coordinates: { x: 47, y: 17, width: 6, height: 3 },
+    coordinates: { x: 47, y: 20, width: 6, height: 5 },
   },
   {
     id: 'mouth-throat',
     name: 'Mouth/Throat',
     keywords: ['mouth', 'throat', 'oral', 'pharynx', 'larynx', 'tongue', 'teeth', 'gums'],
-    coordinates: { x: 46.5, y: 20, width: 7, height: 4 },
+    coordinates: { x: 46, y: 25, width: 8, height: 5 },
   },
   {
     id: 'neck',
     name: 'Neck',
     keywords: ['neck', 'cervical', 'thyroid', 'trachea', 'esophagus'],
-    coordinates: { x: 46, y: 24, width: 8, height: 5 },
+    coordinates: { x: 46, y: 30, width: 8, height: 5 },
   },
   {
     id: 'left-shoulder',
     name: 'Left Shoulder',
     keywords: ['left shoulder', 'left arm', 'left upper arm'],
-    coordinates: { x: 38, y: 29, width: 8, height: 5 },
+    coordinates: { x: 35, y: 35, width: 10, height: 5 },
   },
   {
     id: 'right-shoulder',
     name: 'Right Shoulder',
     keywords: ['right shoulder', 'right arm', 'right upper arm'],
-    coordinates: { x: 54, y: 29, width: 8, height: 5 },
+    coordinates: { x: 55, y: 35, width: 10, height: 5 },
   },
   {
     id: 'chest-upper',
     name: 'Chest (Upper)',
     keywords: ['upper chest', 'lungs', 'pulmonary', 'respiratory', 'bronchi', 'bronchial'],
-    coordinates: { x: 45, y: 29, width: 10, height: 12 }, // Chest area: from below neck to above abdomen
+    coordinates: { x: 40, y: 40, width: 20, height: 15 }, // Chest area: from below neck to above abdomen
   },
   {
     id: 'chest-heart',
     name: 'Chest (Heart)',
     keywords: ['heart', 'cardiac', 'cardiovascular', 'chest', 'myocardial', 'coronary'],
-    coordinates: { x: 48, y: 33, width: 4, height: 6 }, // Heart: centered in upper chest, slightly left
+    coordinates: { x: 47, y: 45, width: 6, height: 5 }, // Heart: centered in upper chest, slightly left
   },
   {
     id: 'left-arm',
     name: 'Left Arm',
     keywords: ['left arm', 'left forearm', 'left elbow'],
-    coordinates: { x: 34, y: 34, width: 4, height: 20 },
+    coordinates: { x: 30, y: 40, width: 5, height: 25 },
   },
   {
     id: 'right-arm',
     name: 'Right Arm',
     keywords: ['right arm', 'right forearm', 'right elbow'],
-    coordinates: { x: 62, y: 34, width: 4, height: 20 },
+    coordinates: { x: 65, y: 40, width: 5, height: 25 },
   },
   {
     id: 'abdomen-upper',
     name: 'Abdomen (Upper)',
     keywords: ['upper abdomen', 'stomach', 'gastric', 'liver', 'hepatic', 'gallbladder', 'spleen'],
-    coordinates: { x: 45, y: 41, width: 10, height: 10 }, // Upper abdomen: clearly below chest, above lower abdomen
+    coordinates: { x: 40, y: 55, width: 20, height: 10 }, // Upper abdomen: clearly below chest, above lower abdomen
   },
   {
     id: 'kidney',
     name: 'Kidney',
     keywords: ['kidney', 'kidneys', 'renal', 'nephron', 'nephritis', 'nephropathy', 'kidney disease', 'kidney failure', 'renal failure'],
-    coordinates: { x: 45, y: 51, width: 10, height: 5 }, // Kidneys: mid-back/flank area, spanning upper to mid abdomen level
+    coordinates: { x: 40, y: 65, width: 20, height: 5 }, // Kidneys: mid-back/flank area, spanning upper to mid abdomen level
   },
   {
     id: 'abdomen-lower',
     name: 'Abdomen (Lower)',
     keywords: ['lower abdomen', 'intestines', 'bowel', 'colon', 'rectal', 'appendix', 'pancreas'],
-    coordinates: { x: 45, y: 56, width: 10, height: 12 }, // Lower abdomen: clearly below upper abdomen
+    coordinates: { x: 40, y: 70, width: 20, height: 10 }, // Lower abdomen: clearly below upper abdomen
   },
   {
     id: 'left-hand',
     name: 'Left Hand',
     keywords: ['left hand', 'left wrist', 'left fingers'],
-    coordinates: { x: 32, y: 54, width: 6, height: 8 },
+    coordinates: { x: 30, y: 65, width: 5, height: 10 },
   },
   {
     id: 'right-hand',
     name: 'Right Hand',
     keywords: ['right hand', 'right wrist', 'right fingers'],
-    coordinates: { x: 62, y: 54, width: 6, height: 8 },
+    coordinates: { x: 65, y: 65, width: 5, height: 10 },
   },
   {
     id: 'left-leg-upper',
     name: 'Left Leg (Upper)',
     keywords: ['left leg', 'left thigh', 'left hip', 'left knee'],
-    coordinates: { x: 45, y: 68, width: 5, height: 15 },
+    coordinates: { x: 45, y: 80, width: 5, height: 10 },
   },
   {
     id: 'right-leg-upper',
     name: 'Right Leg (Upper)',
     keywords: ['right leg', 'right thigh', 'right hip', 'right knee'],
-    coordinates: { x: 50, y: 68, width: 5, height: 15 },
+    coordinates: { x: 50, y: 80, width: 5, height: 10 },
   },
   {
     id: 'left-leg-lower',
     name: 'Left Leg (Lower/Foot)',
     keywords: ['left foot', 'left ankle', 'left lower leg', 'left calf'],
-    coordinates: { x: 45, y: 83, width: 5, height: 17 },
+    coordinates: { x: 45, y: 90, width: 5, height: 10 },
   },
   {
     id: 'right-leg-lower',
     name: 'Right Leg (Lower/Foot)',
     keywords: ['right foot', 'right ankle', 'right lower leg', 'right calf'],
-    coordinates: { x: 50, y: 83, width: 5, height: 17 },
+    coordinates: { x: 50, y: 90, width: 5, height: 10 },
   },
 ];
 

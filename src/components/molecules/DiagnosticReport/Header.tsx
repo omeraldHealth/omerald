@@ -1,7 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
+import { DEFAULT_DC_LOGO_URL } from '@/components/common/lib/constants/constants';
 
 interface HeaderProps {
   report?: any;
@@ -17,7 +18,21 @@ interface HeaderProps {
   } | null;
 }
 
+// Helper function to check if logo URL is broken or invalid
+const isValidLogoUrl = (url: string | null | undefined): boolean => {
+  if (!url) return false;
+  // Filter out broken Unsplash URLs and other invalid URLs
+  if (url.includes('images.unsplash.com') && url.includes('photo-1559757148')) {
+    return false;
+  }
+  return true;
+};
+
 const Header = ({ report, dcDetails, branchDetails }: HeaderProps) => {
+  // State to handle image loading errors
+  const [imageError, setImageError] = useState(false);
+  const [currentLogoUrl, setCurrentLogoUrl] = useState<string | null>(null);
+
   // Get diagnostic center name - handle multiple formats
   const centerName = dcDetails?.centerName || 
     report?.diagnosticCenter?.diagnostic?.name ||
@@ -25,11 +40,28 @@ const Header = ({ report, dcDetails, branchDetails }: HeaderProps) => {
     (typeof report?.diagnosticCenter === 'string' ? report.diagnosticCenter : null) ||
     'Diagnostic Center';
 
-  // Get logo URL
-  const logoUrl = dcDetails?.logoUrl || 
+  // Get logo URL - filter out broken Unsplash URLs
+  const originalLogoUrl = dcDetails?.logoUrl || 
     report?.diagnosticCenter?.diagnostic?.logo ||
     report?.diagnosticCenter?.logo ||
     null;
+
+  // Determine the logo URL to use
+  const logoUrl = useMemo(() => {
+    if (imageError) {
+      return DEFAULT_DC_LOGO_URL;
+    }
+    if (currentLogoUrl) {
+      return currentLogoUrl;
+    }
+    return isValidLogoUrl(originalLogoUrl) ? originalLogoUrl : DEFAULT_DC_LOGO_URL;
+  }, [originalLogoUrl, imageError, currentLogoUrl]);
+
+  // Handle image load error - fallback to default logo
+  const handleImageError = () => {
+    setImageError(true);
+    setCurrentLogoUrl(DEFAULT_DC_LOGO_URL);
+  };
 
   // Get contact information
   const phoneNumber = dcDetails?.phoneNumber || 
@@ -70,6 +102,7 @@ const Header = ({ report, dcDetails, branchDetails }: HeaderProps) => {
               height={80}
               className="object-contain"
               unoptimized
+              onError={handleImageError}
             />
           ) : (
             <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-blue-600 rounded-lg flex items-center justify-center">
