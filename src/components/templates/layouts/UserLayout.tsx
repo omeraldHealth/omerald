@@ -17,6 +17,7 @@ const ROUTES_WITHOUT_SIDEBAR = [
   '/signUp',
   '/verify',
   '/onboard',
+  '/no-access',
   '/404',
   '/about',
   '/pricing',
